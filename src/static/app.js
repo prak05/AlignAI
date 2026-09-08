@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeline = document.getElementById('timeline');
     const scheduledList = document.getElementById('scheduled-list');
     const eligibleList = document.getElementById('eligible-list');
+    const fileSelect = document.getElementById('file-select');
 
     let maxTime = 1; // Track the maximum time to scale the Gantt chart
 
@@ -32,7 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStep.disabled = true;
         btnReset.disabled = true;
         try {
-            const response = await fetch('/reset', { method: 'POST' });
+            const filename = fileSelect ? fileSelect.value : 'ts_test.json';
+            const response = await fetch('/reset', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: filename })
+            });
             const data = await response.json();
             updateUI(data);
         } catch (error) {

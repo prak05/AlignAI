@@ -1,30 +1,33 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import json
+import os
 from main import load_data, get_predecessors, tabu_search, pso
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 
-# Load data once
-DATA_FILE = "data/gemini-code-1788886167629.json"
-project_data = load_data(DATA_FILE)
-preds = get_predecessors(project_data)
-num_activities = len(project_data['activities'])
-if num_activities < 20:
-    makespan, priority_list = tabu_search(project_data, preds)
-    algo = "Tabu Search (TS)"
-else:
-    makespan, priority_list = pso(project_data, preds)
-    algo = "Particle Swarm Optimization (PSO)"
-
 class SchedulerState:
     def __init__(self):
-        self.reset()
+        self.generator = None
+        self.last_state = None
         
-    def reset(self):
-        self.generator = self.serial_sgs_stepper(priority_list, project_data, preds)
+    def reset(self, filepath):
+        project_data = load_data(filepath)
+        preds = get_predecessors(project_data)
+        num_activities = len(project_data['activities'])
+        
+        if num_activities < 20:
+            makespan, priority_list = tabu_search(project_data, preds)
+            algo = "Tabu Search (TS)"
+        else:
+            makespan, priority_list = pso(project_data, preds)
+            algo = "Particle Swarm Optimization (PSO)"
+
+        self.generator = self.serial_sgs_stepper(priority_list, project_data, preds, algo)
         self.last_state = next(self.generator)
         
     def step(self):
+        if not self.generator:
+            return {"error": "Not initialized"}
         try:
             self.last_state = next(self.generator)
             return self.last_state
@@ -32,7 +35,7 @@ class SchedulerState:
             self.last_state['done'] = True
             return self.last_state
 
-    def serial_sgs_stepper(self, priority_list, data, preds):
+    def serial_sgs_stepper(self, priority_list, data, preds, algo):
         n = len(data['activities'])
         start_times = {i: 0 for i in data['activities']}
         finish_times = {i: 0 for i in data['activities']}
@@ -42,7 +45,7 @@ class SchedulerState:
         
         yield {
             "status": "Initialized",
-            "explanation": f"Project loaded. Using {algo} to find priority list: {priority_list}. Starting with Dummy Activity 0.",
+            "explanation": f"Loaded project with {n} activities. Since activities {'<' if n < 20 else '>='} 20, the meta-controller chose {algo}. Priority list found: {priority_list}. Starting with Dummy Activity 0.",
             "scheduled": scheduled,
             "eligible": eligible,
             "start_times": start_times,
@@ -119,6 +122,8 @@ class SchedulerState:
             }
 
 scheduler = SchedulerState()
+# Initialize with default on startup
+scheduler.reset(os.path.join("data", "ts_test.json"))
 
 @app.route('/')
 def index():
@@ -126,7 +131,14 @@ def index():
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    scheduler.reset()
+    req_data = request.get_json(silent=True) or {}
+    filename = req_data.get('filename', 'ts_test.json')
+    filepath = os.path.join("data", filename)
+    
+    if not os.path.exists(filepath):
+        return jsonify({"error": "File not found"}), 404
+        
+    scheduler.reset(filepath)
     return jsonify(scheduler.last_state)
 
 @app.route('/step', methods=['POST'])
