@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enhanced RCPSP Scheduler</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI-Enhanced RCPSP Scheduler</h1>
+            <p>Visualizing Metaheuristics (Tabu Search / PSO) step-by-step</p>
+        </header>
+
+        <div class="controls">
+            <button id="btn-reset" class="btn secondary">Reset Schedule</button>
+            <button id="btn-step" class="btn primary">Next Step</button>
+        </div>
+
+        <main>
+            <div class="panel explanation-panel">
+                <h2>What is happening?</h2>
+                <div id="explanation-box" class="box">
+                    Loading project...
+                </div>
+                <div class="status">
+                    <span id="status-label">Status:</span> <strong id="status-text">Initializing</strong>
+                </div>
+            </div>
+
+            <div class="panel visualization-panel">
+                <h2>Schedule Timeline</h2>
+                <div id="timeline" class="timeline-container">
+                    <!-- Gantt chart bars will be injected here via JS -->
+                </div>
+            </div>
+            
+            <div class="panel state-panel">
+                <div class="state-col">
+                    <h3>Scheduled</h3>
+                    <div id="scheduled-list" class="list-box"></div>
+                </div>
+                <div class="state-col">
+                    <h3>Eligible</h3>
+                    <div id="eligible-list" class="list-box"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
