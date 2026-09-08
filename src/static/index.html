@@ -16,8 +16,10 @@
 
         <div class="controls">
             <select id="file-select" class="btn secondary" style="background-color: var(--panel-bg); color: var(--text-primary);">
-                <option value="ts_test.json">Small Project (Tests Tabu Search)</option>
-                <option value="pso_test.json">Large Project (Tests PSO)</option>
+                <option value="prh_test.json">Very Small (< 8 tasks) - Priority Rule Heuristic</option>
+                <option value="ts_test.json">Small (8-14 tasks) - Tabu Search</option>
+                <option value="ga_test.json">Medium (15-19 tasks) - Genetic Algorithm</option>
+                <option value="pso_test.json">Large (20+ tasks) - Particle Swarm (PSO)</option>
             </select>
             <button id="btn-reset" class="btn secondary">Load & Reset</button>
             <button id="btn-step" class="btn primary">Next Step</button>
