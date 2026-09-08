@@ -121,9 +121,12 @@ class SchedulerState:
                 "durations": data['durations']
             }
 
+# Get the absolute path to the root directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 scheduler = SchedulerState()
 # Initialize with default on startup
-scheduler.reset(os.path.join("data", "ts_test.json"))
+scheduler.reset(os.path.join(BASE_DIR, "data", "ts_test.json"))
 
 @app.route('/')
 def index():
@@ -133,7 +136,7 @@ def index():
 def reset():
     req_data = request.get_json(silent=True) or {}
     filename = req_data.get('filename', 'ts_test.json')
-    filepath = os.path.join("data", filename)
+    filepath = os.path.join(BASE_DIR, "data", filename)
     
     if not os.path.exists(filepath):
         return jsonify({"error": "File not found"}), 404
