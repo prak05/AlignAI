@@ -1,9 +1,15 @@
 from flask import Flask, jsonify, request
 import json
 import os
+import sys
+
+# Add the src directory to the python path so it can find main.py
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(BASE_DIR, "src"))
+
 from main import load_data, get_predecessors, tabu_search, pso
 
-app = Flask(__name__, static_url_path='', static_folder='static')
+app = Flask(__name__, static_url_path='', static_folder='../src/static')
 
 class SchedulerState:
     def __init__(self):
@@ -121,8 +127,7 @@ class SchedulerState:
                 "durations": data['durations']
             }
 
-# Get the absolute path to the root directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR is already defined at the top of the file
 
 scheduler = SchedulerState()
 # Initialize with default on startup
@@ -147,6 +152,10 @@ def reset():
 @app.route('/step', methods=['POST'])
 def step():
     return jsonify(scheduler.step())
+
+# For Vercel Serverless functions, 'app' needs to be at the module level
+# which it already is, but we also ensure __name__ check isn't strictly required
+# though it's standard practice.
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
